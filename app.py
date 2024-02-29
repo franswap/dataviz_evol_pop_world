@@ -76,49 +76,145 @@ df = pd.read_csv(
     },
 )
 
+# Liste des indicateurs pertinents pour les camemberts
+relevant_columns = ["PopSexRatio", "PopDensity", "MedianAgePop"]
+
 app = Dash(__name__)
 
 app.layout = html.Div(
     [
         html.H1(
-            children="Dashboard sur l'evolution de la population mondiale",
+            children="Dashboard sur l'évolution de la population mondiale",
             style={"textAlign": "center"},
         ),
-        dcc.Dropdown(df.Location.unique(), "World", id="dropdown-selection"),
-        dcc.Graph(id="graph-content"),
         html.Div(
             [
-                html.Div(children="My First App with Data"),
-                dash_table.DataTable(data=df.to_dict("records"), page_size=10),
-                dcc.Graph(
-                    figure=px.histogram(
-                        df, x="Location", y="MedianAgePop", histfunc="avg"
-                    )
+                dcc.Dropdown(
+                    options=[
+                        {"label": loc, "value": loc}
+                        for loc in df["Location"].unique()
+                        if loc != "World"
+                    ],
+                    value=df["Location"].unique()[
+                        0
+                    ],  # Sélectionner le premier pays par défaut
+                    id="dropdown-selection",
                 ),
-                dcc.Graph(id="map-content"),
+                html.Div(id="key-stats"),
             ]
+        ),
+        dcc.Graph(id="graph-content"),
+        html.Div(id="pie-charts"),
+        dcc.Graph(id="map-content"),
+        dcc.Graph(id="bubble-chart"),
+        dash_table.DataTable(data=df.to_dict("records"), page_size=10),
+        dcc.Graph(
+            figure=px.histogram(
+                df,
+                x="Location",
+                y="MedianAgePop",
+                histfunc="avg",
+                title="Répartition de l'âge médian par pays",
+                category_orders={
+                    "Location": df.groupby("Location")["MedianAgePop"]
+                    .mean()
+                    .sort_values(ascending=False)
+                    .index
+                },
+            )
         ),
     ]
 )
 
 
-@callback(
+@app.callback(
     Output("graph-content", "figure"),
-    Output("map-content", "figure"),
-    Input("dropdown-selection", "value"),
+    [Input("dropdown-selection", "value")],
 )
-def update_output(value):
-    dff = df[df.Location == value]
-    figure = px.line(dff, x="Time", y="TPopulation1Jan")
-    fig = px.choropleth(
+def update_graph(selected_location):
+    return px.line(
+        df[df["Location"] == selected_location], x="Time", y="TPopulation1Jan"
+    )
+
+
+@app.callback(
+    Output("pie-charts", "children"),
+    [Input("dropdown-selection", "value")],
+)
+def update_pie_charts(selected_location):
+    pie_charts_children = []
+    if selected_location != "World":
+        for col in relevant_columns:
+            top_10_df = df[df["Location"] != "World"].nlargest(10, col)
+            pie_fig = px.pie(
+                top_10_df,
+                names="Location",
+                values=col,
+                title=f"Top 10 des pays par {col}",
+            )
+            pie_charts_children.append(dcc.Graph(figure=pie_fig))
+    else:
+        for col in relevant_columns:
+            top_10_df = df[df["Location"] != "World"].nlargest(10, col)
+            pie_fig = px.pie(
+                top_10_df,
+                names="Location",
+                values=col,
+                title=f"Top 10 des pays par {col}",
+            )
+            pie_charts_children.append(dcc.Graph(figure=pie_fig))
+    return pie_charts_children
+
+
+@app.callback(
+    Output("map-content", "figure"),
+    [Input("dropdown-selection", "value")],
+)
+def update_map(selected_location):
+    return px.choropleth(
         df,
         locations="ISO3_code",
-        color="MedianAgePop",  # lifeExp is a column of gapminder
-        hover_name="Location",  # column to add to hover information
+        color="MedianAgePop",
+        hover_name="Location",
         color_continuous_scale=px.colors.sequential.Plasma,
     )
-    return figure, fig
+
+
+@app.callback(
+    Output("bubble-chart", "figure"),
+    [Input("dropdown-selection", "value")],
+)
+def update_bubble_chart(selected_location):
+    return px.scatter(
+        df[df["Location"] == selected_location],
+        x="Time",
+        y="TPopulation1Jan",
+        hover_data={"Time": "|"},
+        title=f"Données pour TPopulation1Jan",
+    )
+
+
+@app.callback(
+    Output("key-stats", "children"),
+    [Input("dropdown-selection", "value")],
+)
+def update_key_stats(selected_location):
+    dff = df[df["Location"] == selected_location]
+    total_population = dff["TPopulation1Jan"].sum()
+    total_births = dff["Births"].sum()
+    total_deaths = dff["Deaths"].sum()
+    migration_rate = dff["NetMigrations"].mean()
+
+    return html.Div(
+        [
+            html.H2("Chiffres clés"),
+            html.P(f"Nombre total d'habitants : {total_population}"),
+            html.P(f"Nombre total de naissances : {total_births}"),
+            html.P(f"Nombre total de décès : {total_deaths}"),
+            html.P(f"Taux moyen de migration nette : {migration_rate}"),
+        ]
+    )
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run_server(debug=True)
