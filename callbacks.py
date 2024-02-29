@@ -211,7 +211,6 @@ def register_callbacks(df):
             fig = px.histogram(
                 df_one_location,
                 x="MedianAgePop",
-                title="Distribution de l'âge médian de la population dans : "
-                + selected_location,
+                title=f"Répartition de l'âge médian de la population ({selected_location})",
             )
         return fig
