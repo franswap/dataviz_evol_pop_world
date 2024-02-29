@@ -54,7 +54,8 @@ def register_callbacks(df):
     )
     def update_pie_charts(selected_location):
         pie_charts_children = []
-        if selected_location == "World":
+
+        if selected_location == "World" or selected_location is None:
             for col in relevant_columns:
                 # Sélectionner les valeurs pour l'année 2022
                 df_2022 = df[df["Time"] == 2022]
@@ -72,9 +73,9 @@ def register_callbacks(df):
                 )
                 pie_fig.update_traces(textinfo="value")  # Afficher les valeurs brutes
                 pie_charts_children.append(dcc.Graph(figure=pie_fig))
-        return (
-            pie_charts_children if selected_location == "World" else []
-        )  # Retourne une liste vide si un pays est sélectionné
+
+        # Retourne une liste vide si un pays est sélectionné
+        return pie_charts_children
 
     @callback(
         Output("map-content", "figure"),
