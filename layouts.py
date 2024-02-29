@@ -16,14 +16,15 @@ def home_page(df):
             html.Div(
                 [
                     dcc.Dropdown(
-                        options=[
-                            {"label": loc, "value": loc}
-                            for loc in df["Location"].unique()
-                            if loc != "World"
+                        placeholder="Sélectionner une localisation",
+                        options=[{"label": "Monde", "value": "World"}]
+                        + [
+                            {"label": location, "value": location}
+                            for location in df["Location"].unique()
+                            if location != "World"
                         ],
-                        value=df["Location"].unique()[
-                            0
-                        ],  # Sélectionner le premier pays par défaut
+                        # Sélectionner le premier pays par défaut
+                        value=df["Location"].unique()[0],
                         id="dropdown-selection",
                     ),
                     html.Div(id="key-stats"),
@@ -31,23 +32,8 @@ def home_page(df):
             ),
             dcc.Graph(id="population-evolution"),
             dcc.Graph(id="death-birth-evolution"),
-            dcc.Graph(
-                id="histogram",
-                figure=px.histogram(
-                    df,
-                    x="Location",
-                    y="MedianAgePop",
-                    histfunc="avg",
-                    title="Répartition de l'âge médian par pays",
-                    category_orders={
-                        "Location": df.groupby("Location")["MedianAgePop"]
-                        .mean()
-                        .sort_values(ascending=False)
-                        .index
-                    },
-                ),
-            ),
-            html.Div(id="pie-charts"),
+            dcc.Graph(id="histogram"),
+            dmc.SimpleGrid(cols=3, id="pie-charts"),
             dcc.Graph(id="map-content"),
             dash_table.DataTable(
                 id="table",

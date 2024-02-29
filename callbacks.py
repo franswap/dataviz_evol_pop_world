@@ -94,6 +94,18 @@ def register_callbacks(df):
         Input("dropdown-selection", "value"),
     )
     def update_key_stats(selected_location):
+        if selected_location is None:
+            return html.Div(
+                [
+                    html.H2("Chiffres clés"),
+                    html.P(
+                        "Sélectionnez une localisation pour afficher les chiffres clés",
+                        style={"font-size": "1.2em"},
+                    ),
+                ],
+                style={"text-align": "center"},
+            )
+
         dff = df[df["Location"] == selected_location]
         total_population = dff["TPopulation1Jan"].sum()
         total_births = dff["Births"].sum()
@@ -168,10 +180,10 @@ def register_callbacks(df):
         Input("dropdown-selection", "value"),
     )
     def update_table(selected_location):
-        if selected_location != "World":
-            return df[df["Location"] == selected_location].to_dict("records")
+        if selected_location is None:
+            return df.to_dict("records")
         else:
-            return df[df["Location"] == "World"].iloc[::5].to_dict("records")
+            return df[df["Location"] == selected_location].to_dict("records")
 
     # Ajout de l'histogramme à la fin de la mise en page
     @callback(
@@ -179,13 +191,26 @@ def register_callbacks(df):
         [Input("dropdown-selection", "value")],
     )
     def update_histogram(selected_location):
-        if selected_location != "World":
-            dff = df[df["Location"] == selected_location]
+        if selected_location is None:
             fig = px.histogram(
-                dff,
-                x="MedianAgePop",
-                title="Distribution de l'âge médian de la population",
+                df,
+                x="Location",
+                y="MedianAgePop",
+                histfunc="avg",
+                title="Répartition de l'âge médian par pays",
+                category_orders={
+                    "Location": df.groupby("Location")["MedianAgePop"]
+                    .mean()
+                    .sort_values(ascending=False)
+                    .index
+                },
             )
-            return fig
         else:
-            return {}
+            df_one_location = df[df["Location"] == selected_location]
+            fig = px.histogram(
+                df_one_location,
+                x="MedianAgePop",
+                title="Distribution de l'âge médian de la population dans : "
+                + selected_location,
+            )
+        return fig
