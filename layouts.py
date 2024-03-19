@@ -12,7 +12,6 @@ def home_page(df):
                 children="Dashboard sur l'évolution de la population mondiale",
                 style={"textAlign": "center"},
             ),
-            html.Button("Dark Mode", id="dark-mode-toggle", n_clicks=0),
             html.Div(
                 [
                     dcc.Dropdown(

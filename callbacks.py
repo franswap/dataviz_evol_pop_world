@@ -2,25 +2,11 @@ from dash import html, dcc, callback, Output, Input
 import dash_mantine_components as dmc
 import plotly.express as px
 
-# Définir les styles pour le mode sombre
-dark_mode_styles = {"backgroundColor": "#222", "color": "#fff"}
-
-# Définir les styles pour le mode clair
-light_mode_styles = {"backgroundColor": "#fff", "color": "#000"}
-
 # Liste des indicateurs pertinents pour les camemberts
 relevant_columns = ["PopSexRatio", "PopDensity", "MedianAgePop"]
 
 
 def register_callbacks(df):
-    # Callback pour changer le mode
-    @callback(Output("main-content", "style"), Input("dark-mode-toggle", "n_clicks"))
-    def update_style(n_clicks):
-        if n_clicks % 2 == 0:
-            return light_mode_styles
-        else:
-            return dark_mode_styles
-
     @callback(
         Output("population-evolution", "figure"),
         Input("dropdown-selection", "value"),
