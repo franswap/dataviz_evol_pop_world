@@ -1,5 +1,6 @@
 from dash import html, dcc, dash_table
 import dash_mantine_components as dmc
+from dash_iconify import DashIconify
 import plotly.express as px
 
 
@@ -8,9 +9,28 @@ def home_page(df, df_notes):
     layout = html.Div(
         id="main-content",  # Ajouter un ID pour cibler cet élément dans le callback
         children=[
-            html.H1(
-                children="Dashboard sur l'évolution de la population mondiale",
-                style={"textAlign": "center"},
+            html.Div(
+                style={
+                    "display": "flex",
+                    "align-items": "center",
+                    "justify-content": "center",
+                    "margin": 25,
+                    "padding": 20,
+                },
+                children=[
+                    html.H1(
+                        children="Dashboard sur l'évolution de la population mondiale",
+                        style={"textAlign": "center", "margin-right": 20},
+                    ),
+                    dmc.Group(
+                        [
+                            DashIconify(
+                                icon="line-md:document-report-twotone",
+                                width=70,
+                            ),
+                        ]
+                    ),
+                ],
             ),
             html.Div(
                 [
@@ -135,7 +155,7 @@ def home_page(df, df_notes):
                 [
                     dcc.Graph(
                         id="crossfilter-indicator-scatter",
-                        hoverData={"points": "World"},
+                        hoverData={"points": [{"hovertext": "World"}]},
                     )
                 ],
                 style={

@@ -267,7 +267,8 @@ def register_callbacks(df, df_notes):
         return create_time_series(hoverData, yaxis_column_name, axis_type)
 
     def create_time_series(hoverData, column_name, axis_type):
-        country_name = hoverData["points"]
+        country_name = hoverData["points"][0]["hovertext"]
+        print(hoverData["points"])
         dff = df[df["Location"] == country_name]
         title = "<b>{}</b><br>{}".format(country_name, column_name)
 
