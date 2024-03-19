@@ -255,10 +255,7 @@ def register_callbacks(df, df_notes):
         Input("crossfilter-xaxis-type", "value"),
     )
     def update_x_timeseries(hoverData, xaxis_column_name, axis_type):
-        country_name = hoverData["points"]
-        dff = df[df["Location"] == country_name]
-        title = "<b>{}</b><br>{}".format(country_name, xaxis_column_name)
-        return create_time_series(dff, axis_type, title, xaxis_column_name)
+        return create_time_series(hoverData, xaxis_column_name, axis_type)
 
     @callback(
         Output("y-time-series", "figure"),
@@ -267,12 +264,13 @@ def register_callbacks(df, df_notes):
         Input("crossfilter-yaxis-type", "value"),
     )
     def update_y_timeseries(hoverData, yaxis_column_name, axis_type):
+        return create_time_series(hoverData, yaxis_column_name, axis_type)
+
+    def create_time_series(hoverData, column_name, axis_type):
         country_name = hoverData["points"]
         dff = df[df["Location"] == country_name]
-        title = "<b>{}</b><br>{}".format(country_name, yaxis_column_name)
-        return create_time_series(dff, axis_type, title, yaxis_column_name)
+        title = "<b>{}</b><br>{}".format(country_name, column_name)
 
-    def create_time_series(dff, axis_type, title, column_name):
         fig = px.scatter(dff, x="Time", y=column_name)
         fig.update_traces(mode="lines+markers")
         fig.update_xaxes(showgrid=False)
