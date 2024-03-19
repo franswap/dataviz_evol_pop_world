@@ -6,7 +6,8 @@ import plotly.express as px
 relevant_columns = ["PopSexRatio", "PopDensity", "MedianAgePop"]
 
 
-def register_callbacks(df):
+def register_callbacks(df, df_notes):
+    # Mise à jour du graphique de l'évolution de la population en fonction de la localisation
     @callback(
         Output("population-evolution", "figure"),
         Input("dropdown-selection", "value"),
@@ -16,10 +17,11 @@ def register_callbacks(df):
             df[df["Location"] == selected_location],
             x="Time",
             y="TPopulation1Jan",
-            hover_data={"Time": "|"},
+            hover_data={"Time"},
             title=f"Evolution de la population de 1950 à 2100 (projection)",
         )
 
+    # Mise à jour du graphique de l'évolution des naissances et des décès en fonction de la localisation
     @callback(
         Output("death-birth-evolution", "figure"),
         Input("dropdown-selection", "value"),
@@ -34,6 +36,7 @@ def register_callbacks(df):
         )
         return fig
 
+    # Mise à jour des camemberts en fonction de la localisation
     @callback(
         Output("pie-charts", "children"),
         Input("dropdown-selection", "value"),
@@ -63,6 +66,7 @@ def register_callbacks(df):
         # Retourne une liste vide si un pays est sélectionné
         return pie_charts_children
 
+    # Mise à jour de la carte en fonction de la localisation
     @callback(
         Output("map-content", "figure"),
         Input("dropdown-selection", "value"),
@@ -76,6 +80,7 @@ def register_callbacks(df):
             color_continuous_scale=px.colors.sequential.Plasma,
         )
 
+    # Mise à jour des chiffres clés en fonction de la localisation
     @callback(
         Output("key-stats", "children"),
         Input("dropdown-selection", "value"),
@@ -162,6 +167,7 @@ def register_callbacks(df):
             ]
         )
 
+    # Mise à jour du tableau en fonction de la localisation
     @callback(
         Output("table", "data"),
         Input("dropdown-selection", "value"),
@@ -199,4 +205,88 @@ def register_callbacks(df):
                 x="MedianAgePop",
                 title=f"Répartition de l'âge médian de la population ({selected_location})",
             )
+        return fig
+
+    @callback(
+        Output("crossfilter-indicator-scatter", "figure"),
+        Input("crossfilter-xaxis-column", "value"),
+        Input("crossfilter-yaxis-column", "value"),
+        Input("crossfilter-xaxis-type", "value"),
+        Input("crossfilter-yaxis-type", "value"),
+        Input("crossfilter-year--slider", "value"),
+    )
+    def update_graph(
+        xaxis_column_name, yaxis_column_name, xaxis_type, yaxis_type, year_value
+    ):
+        dff = df[df["Time"] == year_value]
+
+        # Agréger les données par année et par lieu
+        dff_aggregated = (
+            dff.groupby("Location")
+            .agg({xaxis_column_name: "first", yaxis_column_name: "first"})
+            .reset_index()
+        )
+
+        fig = px.scatter(
+            dff_aggregated,
+            x=xaxis_column_name,
+            y=yaxis_column_name,
+            hover_name="Location",
+        )
+
+        fig.update_xaxes(
+            title=xaxis_column_name, type="linear" if xaxis_type == "Linear" else "log"
+        )
+
+        fig.update_yaxes(
+            title=yaxis_column_name, type="linear" if yaxis_type == "Linear" else "log"
+        )
+
+        fig.update_layout(
+            margin={"l": 40, "b": 40, "t": 10, "r": 0}, hovermode="closest"
+        )
+
+        return fig
+
+    @callback(
+        Output("x-time-series", "figure"),
+        Input("crossfilter-indicator-scatter", "hoverData"),
+        Input("crossfilter-xaxis-column", "value"),
+        Input("crossfilter-xaxis-type", "value"),
+    )
+    def update_x_timeseries(hoverData, xaxis_column_name, axis_type):
+        country_name = hoverData["points"]
+        dff = df[df["Location"] == country_name]
+        title = "<b>{}</b><br>{}".format(country_name, xaxis_column_name)
+        return create_time_series(dff, axis_type, title, xaxis_column_name)
+
+    @callback(
+        Output("y-time-series", "figure"),
+        Input("crossfilter-indicator-scatter", "hoverData"),
+        Input("crossfilter-yaxis-column", "value"),
+        Input("crossfilter-yaxis-type", "value"),
+    )
+    def update_y_timeseries(hoverData, yaxis_column_name, axis_type):
+        country_name = hoverData["points"]
+        dff = df[df["Location"] == country_name]
+        title = "<b>{}</b><br>{}".format(country_name, yaxis_column_name)
+        return create_time_series(dff, axis_type, title, yaxis_column_name)
+
+    def create_time_series(dff, axis_type, title, column_name):
+        fig = px.scatter(dff, x="Time", y=column_name)
+        fig.update_traces(mode="lines+markers")
+        fig.update_xaxes(showgrid=False)
+        fig.update_yaxes(type="linear" if axis_type == "Linear" else "log")
+        fig.add_annotation(
+            x=0,
+            y=0.85,
+            xanchor="left",
+            yanchor="bottom",
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            align="left",
+            text=title,
+        )
+        fig.update_layout(height=225, margin={"l": 20, "b": 30, "r": 10, "t": 10})
         return fig

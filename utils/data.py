@@ -76,3 +76,18 @@ def load_demographic_indicators():
     )
 
     return df
+
+
+def load_demographic_indicators_notes():
+    df_notes = pd.read_csv(
+        "data/demographic_indicators_notes.csv",
+        dtype={
+            "IndicatorNo": int,
+            "Topic": str,
+            "Indicator": str,
+            "IndicatorName": str,
+            "Unit": str,
+        },
+    )
+
+    return df_notes
