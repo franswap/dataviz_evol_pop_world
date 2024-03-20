@@ -4,3 +4,4 @@ pandas
 dash_mantine_components
 pycountry
 gunicorn
+dash_iconify==1.0.0
