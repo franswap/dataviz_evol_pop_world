@@ -34,6 +34,22 @@ def home_page(df, df_notes):
             ),
             html.Div(
                 [
+                    html.P(
+                        "Découvrez les données les plus récentes et pertinentes des Nations Unies à travers notre projet de datavisualisation. Explorez une multitude d'indicateurs démographiques, économiques et environnementaux qui offrent un aperçu approfondi de notre monde en constante évolution. Du taux de natalité à l'espérance de vie, en passant par les migrations, plongez dans les statistiques clés qui façonnent notre compréhension de la société mondiale actuelle.",
+                        style={"text-align": "justify", "padding": 35},
+                    )
+                ]
+            ),
+            html.Div(
+                [
+                    html.H2(
+                        id="selected-country-heading",
+                        style={"text-align": "center", "padding": 15},
+                    ),
+                    html.P(
+                        "Sélectionnez un emplacement pour afficher les statistiques démographiques, économiques et environnementales correspondantes. Notre projet de datavisualisation vous permet d'explorer une variété d'indicateurs clés des Nations Unies, offrant un aperçu approfondi de notre monde en constante évolution.",
+                        style={"text-align": "center", "padding": 35},
+                    ),
                     dcc.Dropdown(
                         placeholder="Sélectionner une localisation",
                         options=[{"label": "Monde", "value": "World"}]
@@ -45,12 +61,27 @@ def home_page(df, df_notes):
                         # Sélectionner le premier pays par défaut
                         value=df["Location"].unique()[0],
                         id="dropdown-selection",
+                        style={
+                            "width": "300px",
+                            "font-size": "16px",
+                            "font-family": "Arial, sans-serif",
+                            "color": "#333",  # Couleur du texte
+                            "background-color": "#f7f7f7",  # Couleur de fond
+                            "border-radius": "8px",  # Coins arrondis
+                            "border": "1px solid #ccc",  # Bordure
+                            "box-shadow": "0 2px 4px rgba(0,0,0,0.1)",  # Ombre
+                            "margin": "0 auto",  # Centrer le dropdown horizontalement
+                        },
                     ),
                     html.Div(id="key-stats"),
                 ]
             ),
             html.Div(
                 children=[
+                    html.H2(
+                        children="Tendance sur lévolution des populations",
+                        style={"textAlign": "center", "margin-right": 20},
+                    ),
                     dcc.Graph(
                         id="population-evolution",
                         style={"display": "inline-block", "width": "50%"},
@@ -61,47 +92,44 @@ def home_page(df, df_notes):
                     ),
                 ]
             ),
+            # dcc.Graph(id="graphEvol"),
             dcc.Graph(id="histogram"),
             dmc.SimpleGrid(cols=3, id="pie-charts"),
-            dcc.Graph(id="map-content"),
-            dash_table.DataTable(
-                id="table",
-                columns=[
-                    {"name": "Time", "id": "Time"},
-                    {"name": "TPopulation1Jan", "id": "TPopulation1Jan"},
-                    {"name": "PopDensity", "id": "PopDensity"},
-                    {"name": "PopSexRatio", "id": "PopSexRatio"},
-                    {"name": "MedianAgePop", "id": "MedianAgePop"},
-                    {"name": "NatChange", "id": "NatChange"},
-                    {"name": "NatChangeRT", "id": "NatChangeRT"},
-                    {"name": "PopChange", "id": "PopChange"},
-                    {"name": "PopGrowthRate", "id": "PopGrowthRate"},
-                    {"name": "DoublingTime", "id": "DoublingTime"},
-                    {"name": "Births", "id": "Births"},
-                    {"name": "Births1519", "id": "Births1519"},
-                    {"name": "CBR", "id": "CBR"},
-                    {"name": "TFR", "id": "TFR"},
-                    {"name": "NRR", "id": "NRR"},
-                    {"name": "MAC", "id": "MAC"},
-                    {"name": "SRB", "id": "SRB"},
-                    {"name": "Deaths", "id": "Deaths"},
-                    {"name": "DeathsMale", "id": "DeathsMale"},
-                    {"name": "DeathsFemale", "id": "DeathsFemale"},
-                    {"name": "CDR", "id": "CDR"},
-                    {"name": "InfantDeaths", "id": "InfantDeaths"},
-                    {"name": "LBsurvivingAge1", "id": "LBsurvivingAge1"},
-                    {"name": "NetMigrations", "id": "NetMigrations"},
-                ],
-                page_size=15,
+            html.H2(
+                "Ventilation spatiale de l'age médian dans le monde en ",
+                id="map-year-title",
+                style={"text-align": "center", "padding": 15},
             ),
+            # Sélection de l'année pour la carte mondiale
+            html.Div(
+                [
+                    dcc.Slider(
+                        id="map-year-slider",
+                        min=df["Time"].min(),
+                        max=df["Time"].max(),
+                        step=10,  # Afficher tous les 10 ans d'intervalle
+                        value=2024,  # Année par défaut
+                        marks={
+                            str(year): str(year)
+                            for year in range(
+                                df["Time"].min(), df["Time"].max() + 1, 10
+                            )
+                        },
+                    ),
+                ],
+                style={"width": "90%", "margin": "0 auto", "margin-bottom": "20px"},
+            ),
+            dcc.Graph(id="map-content"),
             html.Div(
                 [
                     html.Div(
                         [
                             dcc.Dropdown(
                                 options=[
-                                    {"label": i, "value": i}
-                                    for i in df_notes["Indicator"].unique()
+                                    {"label": label, "value": value}
+                                    for value, label in zip(
+                                        df_notes["Indicator"], df_notes["IndicatorName"]
+                                    )
                                 ],
                                 value="InfantDeaths",
                                 id="crossfilter-xaxis-column",
@@ -124,8 +152,10 @@ def home_page(df, df_notes):
                         [
                             dcc.Dropdown(
                                 options=[
-                                    {"label": i, "value": i}
-                                    for i in df_notes["Indicator"].unique()
+                                    {"label": label, "value": value}
+                                    for value, label in zip(
+                                        df_notes["Indicator"], df_notes["IndicatorName"]
+                                    )
                                 ],
                                 value="PopDensity",
                                 id="crossfilter-yaxis-column",

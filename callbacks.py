@@ -1,5 +1,6 @@
 from dash import html, dcc, callback, Output, Input
 import dash_mantine_components as dmc
+from dash_iconify import DashIconify
 import plotly.express as px
 
 # Liste des indicateurs pertinents pour les camemberts
@@ -20,6 +21,13 @@ def register_callbacks(df, df_notes):
             hover_data={"Time"},
             title=f"Evolution de la population de 1950 à 2100 (projection)",
         )
+
+    @callback(
+        Output("selected-country-heading", "children"),
+        [Input("dropdown-selection", "value")],
+    )
+    def update_selected_country_heading(selected_country):
+        return f"Pays sélectionné : {selected_country}"
 
     # Mise à jour du graphique de l'évolution des naissances et des décès en fonction de la localisation
     @callback(
@@ -66,19 +74,40 @@ def register_callbacks(df, df_notes):
         # Retourne une liste vide si un pays est sélectionné
         return pie_charts_children
 
+    # Mise à jour du titre de la ventilation spatiale en fonction de l'année sélectionnée dans le slider
+    @callback(
+        Output("map-year-title", "children"),
+        Input("map-year-slider", "value"),
+    )
+    def update_map_year_title(selected_year):
+        return f"Ventilation spatiale de l'age médian dans le monde en {selected_year}"
+
     # Mise à jour de la carte en fonction de la localisation
     @callback(
         Output("map-content", "figure"),
-        Input("dropdown-selection", "value"),
+        [Input("dropdown-selection", "value"), Input("map-year-slider", "value")],
     )
-    def update_map(selected_location):
-        return px.choropleth(
-            df,
-            locations="ISO3_code",
-            color="MedianAgePop",
-            hover_name="Location",
-            color_continuous_scale=px.colors.sequential.Plasma,
-        )
+    def update_map(selected_location, selected_year):
+        if selected_year is not None:
+            df_year = df[df["Time"] == selected_year]
+            fig = px.choropleth(
+                df_year,
+                locations="ISO3_code",
+                color="MedianAgePop",
+                hover_name="Location",
+                color_continuous_scale=px.colors.sequential.Plasma,
+            )
+            return fig
+        else:
+            # Si aucune année n'est sélectionnée, afficher la carte avec les données de l'année actuelle par défaut
+            fig = px.choropleth(
+                df,
+                locations="ISO3_code",
+                color="MedianAgePop",
+                hover_name="Location",
+                color_continuous_scale=px.colors.sequential.Plasma,
+            )
+        return fig
 
     # Mise à jour des chiffres clés en fonction de la localisation
     @callback(
@@ -106,77 +135,182 @@ def register_callbacks(df, df_notes):
 
         return html.Div(
             [
-                html.H2("Chiffres clés", style={"text-align": "center"}),
+                html.H2(
+                    "Chiffres clés",
+                    style={"text-align": "center"},
+                ),
                 dmc.SimpleGrid(
                     cols=4,
                     children=[
                         html.Div(
                             [
-                                html.P(
-                                    "Nombre total d'habitants : ",
-                                    style={"font-size": "1.2em"},
-                                ),
-                                html.P(
-                                    round(total_population),
-                                    style={"font-weight": "bold", "font-size": "1.2em"},
+                                html.Div(
+                                    [
+                                        DashIconify(
+                                            icon="raphael:people",
+                                            width=50,
+                                            style={"margin-right": "10px"},
+                                        ),
+                                        html.Div(
+                                            [
+                                                html.H3(
+                                                    "Nombre total d'habitants",
+                                                    style={
+                                                        "margin-bottom": "5px",
+                                                        "text-align": "center",
+                                                        "font-size": "1.2em",
+                                                    },
+                                                ),
+                                                html.P(
+                                                    round(total_population),
+                                                    style={
+                                                        "font-weight": "bold",
+                                                        "font-size": "1.1em",
+                                                        "text-align": "center",
+                                                    },
+                                                ),
+                                            ],
+                                            style={
+                                                "display": "flex",
+                                                "flex-direction": "column",
+                                            },
+                                        ),
+                                    ],
+                                    style={"display": "flex", "align-items": "center"},
                                 ),
                             ],
-                            style={"text-align": "center"},
+                            style={"justify-content": "center"},
                         ),
                         html.Div(
                             [
-                                html.P(
-                                    "Nombre total de naissances : ",
-                                    style={"font-size": "1.2em"},
-                                ),
-                                html.P(
-                                    round(total_births),
-                                    style={"font-weight": "bold", "font-size": "1.2em"},
+                                html.Div(
+                                    [
+                                        DashIconify(
+                                            icon="noto-v1:baby-bottle",
+                                            width=50,
+                                            style={"margin-right": "10px"},
+                                        ),
+                                        html.Div(
+                                            [
+                                                html.H3(
+                                                    "Nombre total de naissances",
+                                                    style={
+                                                        "margin-bottom": "5px",
+                                                        "text-align": "center",
+                                                        "font-size": "1.2em",
+                                                    },
+                                                ),
+                                                html.P(
+                                                    round(total_births),
+                                                    style={
+                                                        "font-weight": "bold",
+                                                        "font-size": "1.1em",
+                                                        "text-align": "center",
+                                                    },
+                                                ),
+                                            ],
+                                            style={
+                                                "display": "flex",
+                                                "flex-direction": "column",
+                                            },
+                                        ),
+                                    ],
+                                    style={
+                                        "display": "flex",
+                                        "align-items": "center",
+                                        "box-shadow": "rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;",
+                                    },
                                 ),
                             ],
-                            style={"text-align": "center"},
+                            style={
+                                "justify-content": "center",
+                            },
                         ),
                         html.Div(
                             [
-                                html.P(
-                                    "Nombre total de décès : ",
-                                    style={"font-size": "1.2em"},
-                                ),
-                                html.P(
-                                    round(total_deaths),
-                                    style={"font-weight": "bold", "font-size": "1.2em"},
+                                html.Div(
+                                    [
+                                        DashIconify(
+                                            icon="healthicons:death-alt2-outline",
+                                            width=50,
+                                            style={"margin-right": "10px"},
+                                        ),
+                                        html.Div(
+                                            [
+                                                html.H3(
+                                                    "Nombre total de décès",
+                                                    style={
+                                                        "margin-bottom": "5px",
+                                                        "text-align": "center",
+                                                        "font-size": "1.2em",
+                                                    },
+                                                ),
+                                                html.P(
+                                                    round(total_deaths),
+                                                    style={
+                                                        "font-weight": "bold",
+                                                        "font-size": "1.1em",
+                                                        "text-align": "center",
+                                                    },
+                                                ),
+                                            ],
+                                            style={
+                                                "display": "flex",
+                                                "flex-direction": "column",
+                                            },
+                                        ),
+                                    ],
+                                    style={"display": "flex", "align-items": "center"},
                                 ),
                             ],
-                            style={"text-align": "center"},
+                            style={"justify-content": "center"},
                         ),
                         html.Div(
                             [
-                                html.P(
-                                    "Taux de migration : ", style={"font-size": "1.2em"}
-                                ),
-                                html.P(
-                                    round(migration_rate),
-                                    style={"font-weight": "bold", "font-size": "1.2em"},
+                                html.Div(
+                                    [
+                                        DashIconify(
+                                            icon="gis:earth-euro-africa-o",
+                                            width=50,
+                                            style={"margin-right": "10px"},
+                                        ),
+                                        html.Div(
+                                            [
+                                                html.H3(
+                                                    "Taux de migration",
+                                                    style={
+                                                        "margin-bottom": "5px",
+                                                        "text-align": "center",
+                                                        "font-size": "1.2em",
+                                                    },
+                                                ),
+                                                html.P(
+                                                    round(migration_rate),
+                                                    style={
+                                                        "font-weight": "bold",
+                                                        "font-size": "1.1em",
+                                                        "text-align": "center",
+                                                    },
+                                                ),
+                                            ],
+                                            style={
+                                                "display": "flex",
+                                                "flex-direction": "column",
+                                            },
+                                        ),
+                                    ],
+                                    style={"display": "flex", "align-items": "center"},
                                 ),
                             ],
-                            style={"text-align": "center"},
+                            style={
+                                "justify-content": "center",
+                            },
                         ),
                     ],
-                    style={"justify-content": "center"},
                 ),
-            ]
+            ],
+            style={"padding": "20px"},
         )
-
-    # Mise à jour du tableau en fonction de la localisation
-    @callback(
-        Output("table", "data"),
-        Input("dropdown-selection", "value"),
-    )
-    def update_table(selected_location):
-        if selected_location is None:
-            return df.to_dict("records")
-        else:
-            return df[df["Location"] == selected_location].to_dict("records")
 
     # Ajout de l'histogramme à la fin de la mise en page
     @callback(
@@ -268,14 +402,16 @@ def register_callbacks(df, df_notes):
 
     def create_time_series(hoverData, column_name, axis_type):
         country_name = hoverData["points"][0]["hovertext"]
-        print(hoverData["points"])
         dff = df[df["Location"] == country_name]
-        title = "<b>{}</b><br>{}".format(country_name, column_name)
+        label = df_notes.loc[
+            df_notes["Indicator"] == column_name, "IndicatorName"
+        ].values[0]
+        title = "<b>{}</b><br>{}".format(country_name, label)
 
         fig = px.scatter(dff, x="Time", y=column_name)
         fig.update_traces(mode="lines+markers")
-        fig.update_xaxes(showgrid=False)
-        fig.update_yaxes(type="linear" if axis_type == "Linear" else "log")
+        fig.update_xaxes(showgrid=False, title="Temps")
+        fig.update_yaxes(title=label, type="linear" if axis_type == "Linear" else "log")
         fig.add_annotation(
             x=0,
             y=0.85,
@@ -287,5 +423,4 @@ def register_callbacks(df, df_notes):
             align="left",
             text=title,
         )
-        fig.update_layout(height=225, margin={"l": 20, "b": 30, "r": 10, "t": 10})
         return fig

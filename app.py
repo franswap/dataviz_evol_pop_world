@@ -12,6 +12,8 @@ app = Dash(
     __name__, external_stylesheets=["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 )
 
+server = app.server
+
 # Charger la mise en page
 app.layout = layouts.home_page(df, df_notes)
 

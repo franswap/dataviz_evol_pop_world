@@ -3,3 +3,4 @@ plotly
 pandas
 dash_mantine_components
 pycountry
+gunicorn
