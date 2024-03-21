@@ -67,12 +67,13 @@ dmc.Card(
                             ),
                             html.Div(
                                 [
-                                    html.H2(
+                                    html.H3(
                                         id="selected-time-heading",
                                         style={"text-align": "center", "padding": 15},
                                     ),
                                     dcc.Dropdown(
                                         placeholder="Sélectionner une date",
+                                        clearable=False,
                                         options=[{"label": "Date", "value": "2024"}]
                                         + [
                                             {"label": time, "value": time}
@@ -102,12 +103,13 @@ dmc.Card(
                             ),
                             html.Div(
                                 [
-                                    html.H2(
+                                    html.H3(
                                         id="selected-country-heading",
                                         style={"text-align": "center", "padding": 15},
                                     ),
                                     dcc.Dropdown(
                                         placeholder="Sélectionner une localisation",
+                                        clearable=False,
                                         options=[{"label": "Monde", "value": "World"}]
                                         + [
                                             {"label": location, "value": location}
