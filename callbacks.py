@@ -22,6 +22,7 @@ def register_callbacks(df, df_notes):
             title=f"Evolution de la population de 1950 à 2100 (projection)",
         )
 
+    # Mise à jour du champ de texte affichant le pays sélectionné
     @callback(
         Output("selected-country-heading", "children"),
         [Input("dropdown-selection", "value")],
@@ -29,6 +30,7 @@ def register_callbacks(df, df_notes):
     def update_selected_country_heading(selected_country):
         return f"Pays sélectionné : {selected_country}"
 
+    # Mise à jour du champ de texte affichant la date sélectionnée
     @callback(
         Output("selected-time-heading", "children"),
         [Input("dropdown-time-selection", "value")],
@@ -89,12 +91,12 @@ def register_callbacks(df, df_notes):
     def update_map_year_title(selected_year):
         return f"Ventilation spatiale de l'age médian dans le monde en {selected_year}"
 
-    # Mise à jour de la carte en fonction de la localisation
+    # Mise à jour de la carte du monde en fonction de l'année
     @callback(
         Output("map-content", "figure"),
-        [Input("dropdown-selection", "value"), Input("map-year-slider", "value")],
+        Input("map-year-slider", "value"),
     )
-    def update_map(selected_location, selected_year):
+    def update_map(selected_year):
         if selected_year is not None:
             df_year = df[df["Time"] == selected_year]
             fig = px.choropleth(
@@ -256,7 +258,7 @@ def register_callbacks(df, df_notes):
                             ],
                             style={"display": "flex", "align-items": "center"},
                         ),
-                                                html.Div(
+                        html.Div(
                             [
                                 DashIconify(
                                     icon="fluent-emoji:male-sign",
@@ -290,7 +292,7 @@ def register_callbacks(df, df_notes):
                             ],
                             style={"display": "flex", "align-items": "center"},
                         ),
-                                                html.Div(
+                        html.Div(
                             [
                                 DashIconify(
                                     icon="fluent-emoji:female-sign",
@@ -356,7 +358,11 @@ def register_callbacks(df, df_notes):
                                     },
                                 ),
                             ],
-                            style={ "display": "flex", "align-items": "center", "justify-content": "center"},
+                            style={
+                                "display": "flex",
+                                "align-items": "center",
+                                "justify-content": "center",
+                            },
                         ),
                     ],
                 ),

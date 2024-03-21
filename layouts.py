@@ -3,13 +3,15 @@ import dash_mantine_components as dmc
 from dash_iconify import DashIconify
 import plotly.express as px
 
-image_path = 'assets/introduction.jpg'
+image_path = "assets/introduction.jpg"
+
 
 # Définir la mise en page de l'application
 def home_page(df, df_notes):
     layout = html.Div(
         id="main-content",  # Ajouter un ID pour cibler cet élément dans le callback
         children=[
+            # En-tête de la page
             html.Div(
                 style={
                     "display": "flex",
@@ -33,37 +35,42 @@ def home_page(df, df_notes):
                     ),
                 ],
             ),
-dmc.Card(
-    children=[
-        dmc.CardSection(
-            dmc.Image(
-                src=image_path,
-                height=400,
-                width=1000,
-            )
-        ),
-        dmc.Space(h=20),
-        dmc.Text(
-            "Découvrez les données les plus récentes et pertinentes des Nations Unies à travers notre projet de datavisualisation. Explorez une multitude d'indicateurs démographiques, économiques et environnementaux qui offrent un aperçu approfondi de notre monde en constante évolution. Du taux de natalité à l'espérance de vie, en passant par les migrations, plongez dans les statistiques clés qui façonnent notre compréhension de la société mondiale actuelle.",
-            size="md",
-            color="dimmed",
-            align="center"
-        ),
-        dmc.Space(h=20),
-    ],
-    withBorder=True,
-    shadow="sm",
-    radius="md",
-    style={"width": 1000, "margin": "auto"},  # Ajout de la propriété "margin: auto"
-),
-
+            # Carte avec une image et un texte
+            dmc.Card(
+                children=[
+                    dmc.CardSection(
+                        dmc.Image(
+                            src=image_path,
+                            height=400,
+                            width=1000,
+                        )
+                    ),
+                    dmc.Space(h=20),
+                    dmc.Text(
+                        "Découvrez les données les plus récentes et pertinentes des Nations Unies à travers notre projet de datavisualisation. Explorez une multitude d'indicateurs démographiques, économiques et environnementaux qui offrent un aperçu approfondi de notre monde en constante évolution. Du taux de natalité à l'espérance de vie, en passant par les migrations, plongez dans les statistiques clés qui façonnent notre compréhension de la société mondiale actuelle.",
+                        size="md",
+                        color="dimmed",
+                        align="center",
+                    ),
+                    dmc.Space(h=20),
+                ],
+                withBorder=True,
+                shadow="sm",
+                radius="md",
+                style={"width": 1000, "margin": "auto"},
+            ),
+            # Section avec des statistiques clés
             html.Div(
                 [
                     html.Div(
                         [
                             html.P(
                                 "Sélectionnez un emplacement pour afficher les statistiques démographiques, économiques et environnementales correspondantes. Notre projet de datavisualisation vous permet d'explorer une variété d'indicateurs clés des Nations Unies, offrant un aperçu approfondi de notre monde en constante évolution.",
-                                style={"text-align": "center", "padding": 35, "font-size": 20},
+                                style={
+                                    "text-align": "center",
+                                    "padding": 35,
+                                    "font-size": 20,
+                                },
                             ),
                             html.Div(
                                 [
@@ -109,7 +116,7 @@ dmc.Card(
                                     ),
                                     dcc.Dropdown(
                                         placeholder="Sélectionner une localisation",
-                                        clearable=False,    
+                                        clearable=False,
                                         options=[{"label": "Monde", "value": "World"}]
                                         + [
                                             {"label": location, "value": location}
@@ -212,6 +219,7 @@ dmc.Card(
                 ],
                 style={"width": "90%", "margin": "0 auto", "margin-bottom": "20px"},
             ),
+            # Carte mondiale
             dcc.Graph(id="map-content"),
             html.Div(
                 [
