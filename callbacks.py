@@ -94,9 +94,9 @@ def register_callbacks(df, df_notes):
     # Mise à jour de la carte du monde en fonction de l'année
     @callback(
         Output("map-content", "figure"),
-        Input("map-year-slider", "value"),
+        [Input("dropdown-selection", "value"), Input("map-year-slider", "value")],
     )
-    def update_map(selected_year):
+    def update_map(selected_location, selected_year):
         if selected_year is not None:
             df_year = df[df["Time"] == selected_year]
             fig = px.choropleth(
@@ -358,11 +358,7 @@ def register_callbacks(df, df_notes):
                                     },
                                 ),
                             ],
-                            style={
-                                "display": "flex",
-                                "align-items": "center",
-                                "justify-content": "center",
-                            },
+                            style={ "display": "flex", "align-items": "center", "justify-content": "center"},
                         ),
                     ],
                 ),
