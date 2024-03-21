@@ -46,23 +46,41 @@ def register_callbacks(df, df_notes):
 
     # Mise à jour des camemberts en fonction de la localisation
     @callback(
-        Output("pie-charts", "children"),
-        Input("dropdown-selection", "value"),
+        Output("pie-charts-container", "children"),
+        [Input("dropdown-selection", "value"), Input("pie-year-slider", "value")],
     )
-    def update_pie_charts(selected_location):
+    def update_pie_charts(selected_location, selected_year):
         pie_charts_children = []
 
         if selected_location == "World" or selected_location is None:
             for col in relevant_columns:
-                # Sélectionner les valeurs pour l'année 2022
-                df_2022 = df[df["Time"] == 2022]
+                # Sélectionner les valeurs pour l'année sélectionnée
+                df_year = df[df["Time"] == selected_year]
                 # Sélectionner les 10 premières lignes pour chaque colonne
-                sorted_values = df_2022.sort_values(by=col, ascending=False).head(10)
+                sorted_values = df_year.sort_values(by=col, ascending=False).head(10)
                 pie_fig = px.pie(
                     sorted_values,
                     names="Location",
                     values=col,
-                    title=f"Top 10 des pays par {col} en 2022",
+                    title=f"Top 10 des pays par {col} en {selected_year}",
+                    labels={
+                        "Location": "Pays",
+                        col: "Valeur",
+                    },  # Définir les étiquettes
+                )
+                pie_fig.update_traces(textinfo="value")  # Afficher les valeurs brutes
+                pie_charts_children.append(dcc.Graph(figure=pie_fig))
+        else:
+            df_location = df[df["Location"] == selected_location]
+            for col in relevant_columns:
+                sorted_values = df_location.sort_values(by=col, ascending=False).head(
+                    10
+                )
+                pie_fig = px.pie(
+                    sorted_values,
+                    names="Location",
+                    values=col,
+                    title=f"Top 10 des pays par {col} en {selected_year} ({selected_location})",
                     labels={
                         "Location": "Pays",
                         col: "Valeur",

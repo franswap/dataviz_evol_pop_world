@@ -94,7 +94,40 @@ def home_page(df, df_notes):
             ),
             # dcc.Graph(id="graphEvol"),
             dcc.Graph(id="histogram"),
-            dmc.SimpleGrid(cols=3, id="pie-charts"),
+            html.Div(
+                [
+                    html.H2(
+                        "Représentation du top pays des principaux indicateurs",
+                        style={"text-align": "center"},
+                    ),
+                    html.Div(
+                        [
+                            dcc.Slider(
+                                id="pie-year-slider",
+                                min=df["Time"].min(),
+                                max=df["Time"].max(),
+                                step=10,
+                                value=2024,
+                                marks={
+                                    str(year): str(year)
+                                    for year in range(
+                                        df["Time"].min(), df["Time"].max() + 1, 10
+                                    )
+                                },
+                            ),
+                            html.Div(
+                                id="pie-charts-container",
+                                style={
+                                    "display": "flex",
+                                    "flex-wrap": "wrap",
+                                    "justify-content": "space-between",
+                                },
+                            ),
+                        ],
+                        style={"width": "90%", "margin": "0 auto"},
+                    ),
+                ]
+            ),
             html.H2(
                 "Ventilation spatiale de l'age médian dans le monde en ",
                 id="map-year-title",
