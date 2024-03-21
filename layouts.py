@@ -59,99 +59,97 @@ def home_page(df, df_notes):
                 radius="md",
                 style={"width": 1000, "margin": "auto"},
             ),
-            # Section avec des statistiques clés
+            # Liste déroulante pour sélectionner le pays et l'année
             html.Div(
                 [
+                    html.P(
+                        "Sélectionnez un emplacement pour afficher les statistiques démographiques, économiques et environnementales correspondantes. Notre projet de datavisualisation vous permet d'explorer une variété d'indicateurs clés des Nations Unies, offrant un aperçu approfondi de notre monde en constante évolution.",
+                        style={
+                            "text-align": "center",
+                            "padding": 35,
+                            "font-size": 20,
+                        },
+                    ),
                     html.Div(
                         [
-                            html.P(
-                                "Sélectionnez un emplacement pour afficher les statistiques démographiques, économiques et environnementales correspondantes. Notre projet de datavisualisation vous permet d'explorer une variété d'indicateurs clés des Nations Unies, offrant un aperçu approfondi de notre monde en constante évolution.",
+                            html.H3(
+                                id="selected-time-heading",
+                                style={"text-align": "center", "padding": 15},
+                            ),
+                            dcc.Dropdown(
+                                placeholder="Sélectionner une date",
+                                clearable=False,
+                                options=[{"label": "Date", "value": "2024"}]
+                                + [
+                                    {"label": time, "value": time}
+                                    for time in df["Time"].unique()
+                                    if time != "2024"
+                                ],
+                                # Définir "2024" comme valeur par défaut
+                                value=2024,
+                                id="dropdown-time-selection",
                                 style={
-                                    "text-align": "center",
-                                    "padding": 35,
-                                    "font-size": 20,
+                                    "width": "300px",
+                                    "font-size": "16px",
+                                    "font-family": "Arial, sans-serif",
+                                    "color": "#333",  # Couleur du texte
+                                    "background-color": "#f7f7f7",  # Couleur de fond
+                                    "border-radius": "8px",  # Coins arrondis
+                                    "border": "1px solid #ccc",  # Bordure
+                                    "box-shadow": "0 2px 4px rgba(0,0,0,0.1)",  # Ombre
+                                    "margin": "0 auto",  # Centrer le dropdown horizontalement
                                 },
-                            ),
-                            html.Div(
-                                [
-                                    html.H3(
-                                        id="selected-time-heading",
-                                        style={"text-align": "center", "padding": 15},
-                                    ),
-                                    dcc.Dropdown(
-                                        placeholder="Sélectionner une date",
-                                        clearable=False,
-                                        options=[{"label": "Date", "value": "2024"}]
-                                        + [
-                                            {"label": time, "value": time}
-                                            for time in df["Time"].unique()
-                                            if time != "2024"
-                                        ],
-                                        # Définir "2024" comme valeur par défaut
-                                        value=2024,
-                                        id="dropdown-time-selection",
-                                        style={
-                                            "width": "300px",
-                                            "font-size": "16px",
-                                            "font-family": "Arial, sans-serif",
-                                            "color": "#333",  # Couleur du texte
-                                            "background-color": "#f7f7f7",  # Couleur de fond
-                                            "border-radius": "8px",  # Coins arrondis
-                                            "border": "1px solid #ccc",  # Bordure
-                                            "box-shadow": "0 2px 4px rgba(0,0,0,0.1)",  # Ombre
-                                            "margin": "0 auto",  # Centrer le dropdown horizontalement
-                                        },
-                                    ),
-                                ],
-                                style={
-                                    "display": "inline-block",
-                                    "width": "50%",
-                                },  # Diviser en deux colonnes
-                            ),
-                            html.Div(
-                                [
-                                    html.H3(
-                                        id="selected-country-heading",
-                                        style={"text-align": "center", "padding": 15},
-                                    ),
-                                    dcc.Dropdown(
-                                        placeholder="Sélectionner une localisation",
-                                        clearable=False,
-                                        options=[{"label": "Monde", "value": "World"}]
-                                        + [
-                                            {"label": location, "value": location}
-                                            for location in df["Location"].unique()
-                                            if location != "World"
-                                        ],
-                                        # Sélectionner le premier pays par défaut
-                                        value=df["Location"].unique()[0],
-                                        id="dropdown-selection",
-                                        style={
-                                            "width": "300px",
-                                            "font-size": "16px",
-                                            "font-family": "Arial, sans-serif",
-                                            "color": "#333",  # Couleur du texte
-                                            "background-color": "#f7f7f7",  # Couleur de fond
-                                            "border-radius": "8px",  # Coins arrondis
-                                            "border": "1px solid #ccc",  # Bordure
-                                            "box-shadow": "0 2px 4px rgba(0,0,0,0.1)",  # Ombre
-                                            "margin": "0 auto",  # Centrer le dropdown horizontalement
-                                        },
-                                    ),
-                                ],
-                                style={
-                                    "display": "inline-block",
-                                    "width": "50%",
-                                },  # Diviser en deux colonnes
                             ),
                         ],
                         style={
-                            "text-align": "center"
-                        },  # Centrer le contenu horizontalement
+                            "display": "inline-block",
+                            "width": "50%",
+                        },  # Diviser en deux colonnes
                     ),
-                    html.Div(id="key-stats"),
-                ]
+                    html.Div(
+                        [
+                            html.H3(
+                                id="selected-country-heading",
+                                style={"text-align": "center", "padding": 15},
+                            ),
+                            dcc.Dropdown(
+                                placeholder="Sélectionner une localisation",
+                                clearable=False,
+                                options=[{"label": "Monde", "value": "World"}]
+                                + [
+                                    {"label": location, "value": location}
+                                    for location in df["Location"].unique()
+                                    if location != "World"
+                                ],
+                                # Sélectionner le premier pays par défaut
+                                value=df["Location"].unique()[0],
+                                id="dropdown-selection",
+                                style={
+                                    "width": "300px",
+                                    "font-size": "16px",
+                                    "font-family": "Arial, sans-serif",
+                                    "color": "#333",  # Couleur du texte
+                                    "background-color": "#f7f7f7",  # Couleur de fond
+                                    "border-radius": "8px",  # Coins arrondis
+                                    "border": "1px solid #ccc",  # Bordure
+                                    "box-shadow": "0 2px 4px rgba(0,0,0,0.1)",  # Ombre
+                                    "margin": "0 auto",  # Centrer le dropdown horizontalement
+                                },
+                            ),
+                        ],
+                        style={
+                            "display": "inline-block",
+                            "width": "50%",
+                        },  # Diviser en deux colonnes
+                    ),
+                ],
+                style={
+                    "text-align": "center"
+                },  # Centrer le contenu horizontalement
             ),
+            # Statistiques clés
+            html.Div(id="key-stats"),
+            # Graphiques de tendance sur l'évolution de la population
             html.Div(
                 children=[
                     html.H2(
@@ -168,6 +166,7 @@ def home_page(df, df_notes):
                     ),
                 ]
             ),
+            # Représentation du top pays des principaux indicateurs
             html.Div(
                 [
                     html.H2(
@@ -195,6 +194,7 @@ def home_page(df, df_notes):
                     ),
                 ]
             ),
+            # Carte mondiale de la ventilation spatiale de l'age médian
             html.H2(
                 "Ventilation spatiale de l'age médian dans le monde en ",
                 id="map-year-title",
@@ -221,10 +221,13 @@ def home_page(df, df_notes):
             ),
             # Carte mondiale
             dcc.Graph(id="map-content"),
+            # Graphiques de dispersion et de tendance
             html.Div(
                 [
+                    # Gauche: Graphique de dispersion
                     html.Div(
                         [
+                            # Liste déroulante pour sélectionner l'indicateur
                             dcc.Dropdown(
                                 options=[
                                     {"label": label, "value": value}
@@ -235,6 +238,7 @@ def home_page(df, df_notes):
                                 value="InfantDeaths",
                                 id="crossfilter-xaxis-column",
                             ),
+                            # Type linéaire ou logarithmique
                             dcc.RadioItems(
                                 options=[
                                     {"label": i, "value": i} for i in ["Linear", "Log"]
@@ -246,11 +250,36 @@ def home_page(df, df_notes):
                                     "marginTop": "5px",
                                 },
                             ),
+                            # Graphique de dispersion
+                            html.Div(
+                                [
+                                    dcc.Graph(
+                                        id="crossfilter-indicator-scatter",
+                                        hoverData={"points": [{"hovertext": "World"}]},
+                                    )
+                                ],
+                            ),
+                            # Slider pour sélectionner l'année
+                            html.Div(
+                                dcc.Slider(
+                                    min=df["Time"].min(),
+                                    max=df["Time"].max(),
+                                    step=None,
+                                    id="crossfilter-year--slider",
+                                    value=2024,
+                                    marks={
+                                        str(year): str(year)
+                                        for year in range(df["Time"].min(), df["Time"].max(), 10)
+                                    },
+                                ),
+                            ),
                         ],
                         style={"width": "49%", "display": "inline-block"},
                     ),
+                    # Droite: Graphiques de tendance
                     html.Div(
                         [
+                            # Liste déroulante pour sélectionner l'indicateur
                             dcc.Dropdown(
                                 options=[
                                     {"label": label, "value": value}
@@ -261,6 +290,7 @@ def home_page(df, df_notes):
                                 value="PopDensity",
                                 id="crossfilter-yaxis-column",
                             ),
+                            # Type linéaire ou logarithmique
                             dcc.RadioItems(
                                 options=[
                                     {"label": i, "value": i} for i in ["Linear", "Log"]
@@ -272,6 +302,13 @@ def home_page(df, df_notes):
                                     "marginTop": "5px",
                                 },
                             ),
+                            # Graphiques
+                            html.Div(
+                                [
+                                    dcc.Graph(id="x-time-series"),
+                                    dcc.Graph(id="y-time-series"),
+                                ],
+                            ),
                         ],
                         style={
                             "width": "49%",
@@ -281,41 +318,7 @@ def home_page(df, df_notes):
                     ),
                 ],
                 style={"padding": "10px 5px"},
-            ),
-            html.Div(
-                [
-                    dcc.Graph(
-                        id="crossfilter-indicator-scatter",
-                        hoverData={"points": [{"hovertext": "World"}]},
-                    )
-                ],
-                style={
-                    "width": "49%",
-                    "display": "inline-block",
-                    "padding": "0 20",
-                },
-            ),
-            html.Div(
-                [
-                    dcc.Graph(id="x-time-series"),
-                    dcc.Graph(id="y-time-series"),
-                ],
-                style={"display": "inline-block", "width": "49%", "margin": 0},
-            ),
-            html.Div(
-                dcc.Slider(
-                    min=df["Time"].min(),
-                    max=df["Time"].max(),
-                    step=None,
-                    id="crossfilter-year--slider",
-                    value=2024,
-                    marks={
-                        str(year): str(year)
-                        for year in range(df["Time"].min(), df["Time"].max(), 10)
-                    },
-                ),
-                style={"width": "49%", "padding": "0px 20px 20px 20px"},
-            ),
+            ),            
         ],
     )
     return layout

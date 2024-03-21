@@ -21,4 +21,4 @@ app.layout = layouts.home_page(df, df_notes)
 callbacks.register_callbacks(df, df_notes)
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=False)
