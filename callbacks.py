@@ -29,6 +29,13 @@ def register_callbacks(df, df_notes):
     def update_selected_country_heading(selected_country):
         return f"Pays sélectionné : {selected_country}"
 
+    @callback(
+        Output("selected-time-heading", "children"),
+        [Input("dropdown-time-selection", "value")],
+    )
+    def update_selected_time_heading(selected_date):
+        return f"Date sélectionnée : {selected_date}"
+
     # Mise à jour du graphique de l'évolution des naissances et des décès en fonction de la localisation
     @callback(
         Output("death-birth-evolution", "figure"),
@@ -57,12 +64,12 @@ def register_callbacks(df, df_notes):
                 # Sélectionner les valeurs pour l'année sélectionnée
                 df_year = df[df["Time"] == selected_year]
                 # Sélectionner les 10 premières lignes pour chaque colonne
-                sorted_values = df_year.sort_values(by=col, ascending=False).head(10)
+                sorted_values = df_year.sort_values(by=col, ascending=False).head(5)
                 pie_fig = px.pie(
                     sorted_values,
                     names="Location",
                     values=col,
-                    title=f"Top 10 des pays par {col} en {selected_year}",
+                    title=f"Top 5 des pays par {col} en {selected_year}",
                     labels={
                         "Location": "Pays",
                         col: "Valeur",
@@ -74,13 +81,13 @@ def register_callbacks(df, df_notes):
             df_location = df[df["Location"] == selected_location]
             for col in relevant_columns:
                 sorted_values = df_location.sort_values(by=col, ascending=False).head(
-                    10
+                    5
                 )
                 pie_fig = px.pie(
                     sorted_values,
                     names="Location",
                     values=col,
-                    title=f"Top 10 des pays par {col} en {selected_year} ({selected_location})",
+                    title=f"Top 5 des pays par {col} en {selected_year} ({selected_location})",
                     labels={
                         "Location": "Pays",
                         col: "Valeur",
@@ -127,12 +134,12 @@ def register_callbacks(df, df_notes):
             )
         return fig
 
-    # Mise à jour des chiffres clés en fonction de la localisation
+    # Mise à jour des chiffres clés en fonction de la localisation et de la date
     @callback(
         Output("key-stats", "children"),
-        Input("dropdown-selection", "value"),
+        [Input("dropdown-selection", "value"), Input("dropdown-time-selection", "value")],
     )
-    def update_key_stats(selected_location):
+    def update_key_stats(selected_location, selected_date):
         if selected_location is None:
             return html.Div(
                 [
@@ -145,7 +152,7 @@ def register_callbacks(df, df_notes):
                 style={"text-align": "center"},
             )
 
-        dff = df[df["Location"] == selected_location]
+        dff = df[(df["Location"] == selected_location) & (df["Time"] == selected_date)]
         total_population = dff["TPopulation1Jan"].sum()
         total_births = dff["Births"].sum()
         total_deaths = dff["Deaths"].sum()
@@ -162,167 +169,143 @@ def register_callbacks(df, df_notes):
                     children=[
                         html.Div(
                             [
+                                DashIconify(
+                                    icon="raphael:people",
+                                    width=50,
+                                    style={"margin-right": "10px"},
+                                ),
                                 html.Div(
                                     [
-                                        DashIconify(
-                                            icon="raphael:people",
-                                            width=50,
-                                            style={"margin-right": "10px"},
-                                        ),
-                                        html.Div(
-                                            [
-                                                html.H3(
-                                                    "Nombre total d'habitants",
-                                                    style={
-                                                        "margin-bottom": "5px",
-                                                        "text-align": "center",
-                                                        "font-size": "1.2em",
-                                                    },
-                                                ),
-                                                html.P(
-                                                    round(total_population),
-                                                    style={
-                                                        "font-weight": "bold",
-                                                        "font-size": "1.1em",
-                                                        "text-align": "center",
-                                                    },
-                                                ),
-                                            ],
+                                        html.H3(
+                                            "Nombre total d'habitants",
                                             style={
-                                                "display": "flex",
-                                                "flex-direction": "column",
+                                                "margin-bottom": "5px",
+                                                "text-align": "center",
+                                                "font-size": "1.2em",
                                             },
                                         ),
-                                    ],
-                                    style={"display": "flex", "align-items": "center"},
-                                ),
-                            ],
-                            style={"justify-content": "center"},
-                        ),
-                        html.Div(
-                            [
-                                html.Div(
-                                    [
-                                        DashIconify(
-                                            icon="noto-v1:baby-bottle",
-                                            width=50,
-                                            style={"margin-right": "10px"},
-                                        ),
-                                        html.Div(
-                                            [
-                                                html.H3(
-                                                    "Nombre total de naissances",
-                                                    style={
-                                                        "margin-bottom": "5px",
-                                                        "text-align": "center",
-                                                        "font-size": "1.2em",
-                                                    },
-                                                ),
-                                                html.P(
-                                                    round(total_births),
-                                                    style={
-                                                        "font-weight": "bold",
-                                                        "font-size": "1.1em",
-                                                        "text-align": "center",
-                                                    },
-                                                ),
-                                            ],
+                                        html.P(
+                                            round(total_population),
                                             style={
-                                                "display": "flex",
-                                                "flex-direction": "column",
+                                                "font-weight": "bold",
+                                                "font-size": "1.1em",
+                                                "text-align": "center",
                                             },
                                         ),
                                     ],
                                     style={
                                         "display": "flex",
-                                        "align-items": "center",
-                                        "box-shadow": "rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;",
+                                        "flex-direction": "column",
+                                    },
+                                ),
+                            ],
+                            style={"display": "flex", "align-items": "center"},
+                        ),
+                        html.Div(
+                            [
+                                DashIconify(
+                                    icon="noto-v1:baby-bottle",
+                                    width=50,
+                                    style={"margin-right": "10px"},
+                                ),
+                                html.Div(
+                                    [
+                                        html.H3(
+                                            "Nombre total de naissances",
+                                            style={
+                                                "margin-bottom": "5px",
+                                                "text-align": "center",
+                                                "font-size": "1.2em",
+                                            },
+                                        ),
+                                        html.P(
+                                            round(total_births),
+                                            style={
+                                                "font-weight": "bold",
+                                                "font-size": "1.1em",
+                                                "text-align": "center",
+                                            },
+                                        ),
+                                    ],
+                                    style={
+                                        "display": "flex",
+                                        "flex-direction": "column",
                                     },
                                 ),
                             ],
                             style={
-                                "justify-content": "center",
+                                "display": "flex",
+                                "align-items": "center",
+                                "box-shadow": "rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;",
                             },
                         ),
                         html.Div(
                             [
+                                DashIconify(
+                                    icon="healthicons:death-alt2-outline",
+                                    width=50,
+                                    style={"margin-right": "10px"},
+                                ),
                                 html.Div(
                                     [
-                                        DashIconify(
-                                            icon="healthicons:death-alt2-outline",
-                                            width=50,
-                                            style={"margin-right": "10px"},
-                                        ),
-                                        html.Div(
-                                            [
-                                                html.H3(
-                                                    "Nombre total de décès",
-                                                    style={
-                                                        "margin-bottom": "5px",
-                                                        "text-align": "center",
-                                                        "font-size": "1.2em",
-                                                    },
-                                                ),
-                                                html.P(
-                                                    round(total_deaths),
-                                                    style={
-                                                        "font-weight": "bold",
-                                                        "font-size": "1.1em",
-                                                        "text-align": "center",
-                                                    },
-                                                ),
-                                            ],
+                                        html.H3(
+                                            "Nombre total de décès",
                                             style={
-                                                "display": "flex",
-                                                "flex-direction": "column",
+                                                "margin-bottom": "5px",
+                                                "text-align": "center",
+                                                "font-size": "1.2em",
+                                            },
+                                        ),
+                                        html.P(
+                                            round(total_deaths),
+                                            style={
+                                                "font-weight": "bold",
+                                                "font-size": "1.1em",
+                                                "text-align": "center",
                                             },
                                         ),
                                     ],
-                                    style={"display": "flex", "align-items": "center"},
+                                    style={
+                                        "display": "flex",
+                                        "flex-direction": "column",
+                                    },
                                 ),
                             ],
-                            style={"justify-content": "center"},
+                            style={"display": "flex", "align-items": "center"},
                         ),
                         html.Div(
                             [
+                                DashIconify(
+                                    icon="gis:earth-euro-africa-o",
+                                    width=50,
+                                    style={"margin-right": "10px"},
+                                ),
                                 html.Div(
                                     [
-                                        DashIconify(
-                                            icon="gis:earth-euro-africa-o",
-                                            width=50,
-                                            style={"margin-right": "10px"},
-                                        ),
-                                        html.Div(
-                                            [
-                                                html.H3(
-                                                    "Taux de migration",
-                                                    style={
-                                                        "margin-bottom": "5px",
-                                                        "text-align": "center",
-                                                        "font-size": "1.2em",
-                                                    },
-                                                ),
-                                                html.P(
-                                                    round(migration_rate),
-                                                    style={
-                                                        "font-weight": "bold",
-                                                        "font-size": "1.1em",
-                                                        "text-align": "center",
-                                                    },
-                                                ),
-                                            ],
+                                        html.H3(
+                                            "Taux de migration",
                                             style={
-                                                "display": "flex",
-                                                "flex-direction": "column",
+                                                "margin-bottom": "5px",
+                                                "text-align": "center",
+                                                "font-size": "1.2em",
+                                            },
+                                        ),
+                                        html.P(
+                                            round(migration_rate),
+                                            style={
+                                                "font-weight": "bold",
+                                                "font-size": "1.1em",
+                                                "text-align": "center",
                                             },
                                         ),
                                     ],
-                                    style={"display": "flex", "align-items": "center"},
+                                    style={
+                                        "display": "flex",
+                                        "flex-direction": "column",
+                                    },
                                 ),
                             ],
-                            style={
-                                "justify-content": "center",
-                            },
+                            style={"display": "flex", "align-items": "center"},
                         ),
                     ],
                 ),
