@@ -64,30 +64,12 @@ def register_callbacks(df, df_notes):
                 # Sélectionner les valeurs pour l'année sélectionnée
                 df_year = df[df["Time"] == selected_year]
                 # Sélectionner les 10 premières lignes pour chaque colonne
-                sorted_values = df_year.sort_values(by=col, ascending=False).head(5)
+                sorted_values = df_year.sort_values(by=col, ascending=False).head(10)
                 pie_fig = px.pie(
                     sorted_values,
                     names="Location",
                     values=col,
                     title=f"Top 5 des pays par {col} en {selected_year}",
-                    labels={
-                        "Location": "Pays",
-                        col: "Valeur",
-                    },  # Définir les étiquettes
-                )
-                pie_fig.update_traces(textinfo="value")  # Afficher les valeurs brutes
-                pie_charts_children.append(dcc.Graph(figure=pie_fig))
-        else:
-            df_location = df[df["Location"] == selected_location]
-            for col in relevant_columns:
-                sorted_values = df_location.sort_values(by=col, ascending=False).head(
-                    5
-                )
-                pie_fig = px.pie(
-                    sorted_values,
-                    names="Location",
-                    values=col,
-                    title=f"Top 5 des pays par {col} en {selected_year} ({selected_location})",
                     labels={
                         "Location": "Pays",
                         col: "Valeur",
