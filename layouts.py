@@ -109,7 +109,7 @@ dmc.Card(
                                     ),
                                     dcc.Dropdown(
                                         placeholder="Sélectionner une localisation",
-                                        clearable=False,
+                                        clearable=False,    
                                         options=[{"label": "Monde", "value": "World"}]
                                         + [
                                             {"label": location, "value": location}
@@ -161,8 +161,6 @@ dmc.Card(
                     ),
                 ]
             ),
-            # dcc.Graph(id="graphEvol"),
-            dcc.Graph(id="histogram"),
             html.Div(
                 [
                     html.H2(
@@ -294,7 +292,7 @@ dmc.Card(
                     dcc.Graph(id="x-time-series"),
                     dcc.Graph(id="y-time-series"),
                 ],
-                style={"display": "inline-block", "width": "49%"},
+                style={"display": "inline-block", "width": "49%", "margin": 0},
             ),
             html.Div(
                 dcc.Slider(

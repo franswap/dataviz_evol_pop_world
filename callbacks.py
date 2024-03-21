@@ -139,6 +139,8 @@ def register_callbacks(df, df_notes):
         total_births = dff["Births"].sum()
         total_deaths = dff["Deaths"].sum()
         migration_rate = dff["NetMigrations"].mean()
+        LExMale = dff["LExMale"].mean()
+        LExFemale = dff["LExFemale"].mean()
 
         return html.Div(
             [
@@ -147,7 +149,7 @@ def register_callbacks(df, df_notes):
                     style={"text-align": "center"},
                 ),
                 dmc.SimpleGrid(
-                    cols=4,
+                    cols=3,
                     children=[
                         html.Div(
                             [
@@ -218,7 +220,6 @@ def register_callbacks(df, df_notes):
                             style={
                                 "display": "flex",
                                 "align-items": "center",
-                                "box-shadow": "rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;",
                             },
                         ),
                         html.Div(
@@ -240,6 +241,74 @@ def register_callbacks(df, df_notes):
                                         ),
                                         html.P(
                                             round(total_deaths),
+                                            style={
+                                                "font-weight": "bold",
+                                                "font-size": "1.1em",
+                                                "text-align": "center",
+                                            },
+                                        ),
+                                    ],
+                                    style={
+                                        "display": "flex",
+                                        "flex-direction": "column",
+                                    },
+                                ),
+                            ],
+                            style={"display": "flex", "align-items": "center"},
+                        ),
+                                                html.Div(
+                            [
+                                DashIconify(
+                                    icon="fluent-emoji:male-sign",
+                                    width=50,
+                                    style={"margin-right": "10px"},
+                                ),
+                                html.Div(
+                                    [
+                                        html.H3(
+                                            "Espérance de vie moyenne des homme",
+                                            style={
+                                                "margin-bottom": "5px",
+                                                "text-align": "center",
+                                                "font-size": "1.2em",
+                                            },
+                                        ),
+                                        html.P(
+                                            round(LExMale),
+                                            style={
+                                                "font-weight": "bold",
+                                                "font-size": "1.1em",
+                                                "text-align": "center",
+                                            },
+                                        ),
+                                    ],
+                                    style={
+                                        "display": "flex",
+                                        "flex-direction": "column",
+                                    },
+                                ),
+                            ],
+                            style={"display": "flex", "align-items": "center"},
+                        ),
+                                                html.Div(
+                            [
+                                DashIconify(
+                                    icon="fluent-emoji:female-sign",
+                                    width=50,
+                                    style={"margin-right": "10px"},
+                                ),
+                                html.Div(
+                                    [
+                                        html.H3(
+                                            "Espérance de vie moyenne des femmes",
+                                            style={
+                                                "margin-bottom": "5px",
+                                                "text-align": "center",
+                                                "font-size": "1.2em",
+                                            },
+                                        ),
+                                        html.P(
+                                            round(LExFemale),
                                             style={
                                                 "font-weight": "bold",
                                                 "font-size": "1.1em",
@@ -287,42 +356,13 @@ def register_callbacks(df, df_notes):
                                     },
                                 ),
                             ],
-                            style={"display": "flex", "align-items": "center"},
+                            style={ "display": "flex", "align-items": "center", "justify-content": "center"},
                         ),
                     ],
                 ),
             ],
             style={"padding": "20px"},
         )
-
-    # Ajout de l'histogramme à la fin de la mise en page
-    @callback(
-        Output("histogram", "figure"),
-        [Input("dropdown-selection", "value")],
-    )
-    def update_histogram(selected_location):
-        if selected_location is None:
-            fig = px.histogram(
-                df,
-                x="Location",
-                y="MedianAgePop",
-                histfunc="avg",
-                title="Répartition de l'âge médian par pays",
-                category_orders={
-                    "Location": df.groupby("Location")["MedianAgePop"]
-                    .mean()
-                    .sort_values(ascending=False)
-                    .index
-                },
-            )
-        else:
-            df_one_location = df[df["Location"] == selected_location]
-            fig = px.histogram(
-                df_one_location,
-                x="MedianAgePop",
-                title=f"Répartition de l'âge médian de la population ({selected_location})",
-            )
-        return fig
 
     @callback(
         Output("crossfilter-indicator-scatter", "figure"),
