@@ -449,3 +449,13 @@ def register_callbacks(df, df_notes):
             text=title,
         )
         return fig
+
+    # Définissez votre callback pour contrôler la visibilité des éléments en fonction de la valeur de dropdown-selection
+    @callback(
+        Output("pie-container", "style"),
+        Input("dropdown-selection", "value")
+    )
+    def hide_elements(selected_location):
+        # Masquer les éléments si l'option sélectionnée n'est pas 'World'
+        if selected_location != 'World':
+            return {'display': 'none'}

@@ -168,7 +168,8 @@ def home_page(df, df_notes):
             ),
             # Représentation du top pays des principaux indicateurs
             html.Div(
-                [
+                id="pie-container",
+                children=[
                     html.H2(
                         "Représentation du top pays des principaux indicateurs",
                         style={"text-align": "center"},
